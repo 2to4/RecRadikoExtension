@@ -14,6 +14,8 @@ settings:
   base:
     SWIFT_VERSION: "5.9"
     CODE_SIGN_STYLE: Automatic
+    DEVELOPMENT_TEAM: 3KYQYNYN7U        # 両ターゲットで同一証明書を使用
+    CODE_SIGN_IDENTITY: "Apple Development"
     ENABLE_HARDENED_RUNTIME: YES
     DEBUG_INFORMATION_FORMAT: dwarf-with-dsym
 
