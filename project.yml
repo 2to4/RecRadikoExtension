@@ -13,11 +13,21 @@ options:
 settings:
   base:
     SWIFT_VERSION: "5.9"
-    CODE_SIGN_STYLE: Automatic
-    DEVELOPMENT_TEAM: 3KYQYNYN7U        # 両ターゲットで同一証明書を使用
-    CODE_SIGN_IDENTITY: "Apple Development"
-    ENABLE_HARDENED_RUNTIME: YES
     DEBUG_INFORMATION_FORMAT: dwarf-with-dsym
+  configs:
+    Debug:
+      # ── 開発時: アドホック署名（Apple ID 不要）────────────────────────────
+      # Safari → 開発 → 未署名の拡張機能を許可 を有効にしてから使用する
+      CODE_SIGN_STYLE: Manual
+      CODE_SIGN_IDENTITY: "-"            # "-" = アドホック署名（ローカルのみ）
+      CODE_SIGNING_REQUIRED: "NO"
+      ENABLE_HARDENED_RUNTIME: "NO"
+    Release:
+      # ── 配布時: Apple ID と証明書が必要 ──────────────────────────────────
+      CODE_SIGN_STYLE: Automatic
+      DEVELOPMENT_TEAM: 3KYQYNYN7U
+      CODE_SIGN_IDENTITY: "Apple Development"
+      ENABLE_HARDENED_RUNTIME: "YES"
 
 # ─── ビルド構成 ────────────────────────────────────────────────────────────────
 configs:
