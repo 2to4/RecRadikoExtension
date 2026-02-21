@@ -1,0 +1,25 @@
+# ─── Xcode ────────────────────────────────────────────────────────────────────
+# xcodeproj は xcodegen generate で再生成するため管理不要
+*.xcodeproj/
+*.xcworkspace/
+
+# ユーザー固有の設定
+xcuserdata/
+*.xcuserstate
+*.xccheckout
+
+# ビルド成果物
+DerivedData/
+build/
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# ─── macOS ─────────────────────────────────────────────────────────────────────
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# ─── Claude Code ─────────────────────────────────────────────────────────────
+.claude/settings.local.json

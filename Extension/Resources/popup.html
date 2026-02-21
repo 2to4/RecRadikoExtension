@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>RecRadiko</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, "Helvetica Neue", sans-serif;
+      font-size: 13px;
+      color: #1d1d1f;
+      background: #f5f5f7;
+      width: 320px;
+    }
+
+    header {
+      background: #1c1c1e;
+      color: #fff;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    header h1 { font-size: 15px; font-weight: 600; flex: 1; }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .ok   { background: #30d158; color: #fff; }
+    .err  { background: #ff453a; color: #fff; }
+    .wait { background: #636366; color: #fff; }
+
+    section {
+      padding: 10px 14px;
+      border-bottom: 1px solid #d1d1d6;
+    }
+    section:last-child { border-bottom: none; }
+    .sec-title {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #8e8e93;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 5px;
+    }
+    .row:last-child { margin-bottom: 0; }
+    .lbl { color: #636366; font-size: 11px; white-space: nowrap; }
+    .val { font-size: 12px; font-weight: 500;
+           max-width: 190px; overflow: hidden;
+           text-overflow: ellipsis; white-space: nowrap; }
+    .rule-on  { color: #30d158; }
+    .rule-off { color: #ff453a; }
+
+    /* エリア選択 */
+    select {
+      width: 100%;
+      padding: 6px 8px;
+      border: 1px solid #d1d1d6;
+      border-radius: 8px;
+      background: #fff;
+      font-size: 12px;
+      color: #1d1d1f;
+      cursor: pointer;
+    }
+
+    /* ボタン */
+    .btn-row { display: flex; gap: 6px; }
+    button {
+      flex: 1;
+      padding: 8px;
+      border: none;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    button:disabled { opacity: 0.4; cursor: not-allowed; }
+    button:not(:disabled):hover { opacity: 0.82; }
+    .btn-reauth   { background: #0071e3; color: #fff; }
+    .btn-area     { background: #5e5ce6; color: #fff; }
+    .btn-download { background: #30d158; color: #fff; width: 100%; margin-top: 6px; }
+
+    /* プログレス */
+    #progress-wrap { display: none; }
+    .progress-bar-bg {
+      background: #d1d1d6;
+      border-radius: 4px;
+      height: 6px;
+      overflow: hidden;
+      margin-top: 6px;
+    }
+    .progress-bar-fill {
+      background: #30d158;
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.3s;
+      width: 0%;
+    }
+    #progress-label { font-size: 11px; color: #636366; margin-top: 4px; }
+
+    /* デバッグ */
+    details { font-size: 11px; }
+    summary { cursor: pointer; color: #636366; }
+    pre {
+      margin-top: 6px;
+      font-size: 10px;
+      white-space: pre-wrap;
+      word-break: break-all;
+      background: #1c1c1e;
+      color: #98e4a0;
+      padding: 8px;
+      border-radius: 6px;
+      max-height: 120px;
+      overflow-y: auto;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ヘッダー -->
+<header>
+  <h1>RecRadiko</h1>
+  <span id="auth-badge" class="badge wait">確認中</span>
+</header>
+
+<!-- 認証情報 -->
+<section>
+  <div class="sec-title">認証状態</div>
+  <div class="row">
+    <span class="lbl">エリア</span>
+    <span class="val" id="area-info">—</span>
+  </div>
+  <div class="row">
+    <span class="lbl">トークン取得</span>
+    <span class="val" id="token-age">—</span>
+  </div>
+  <div class="row">
+    <span class="lbl">ヘッダー注入ルール</span>
+    <span class="val" id="rule-status">—</span>
+  </div>
+</section>
+
+<!-- エリア選択 -->
+<section>
+  <div class="sec-title">エリア設定</div>
+  <select id="area-select"></select>
+  <div class="btn-row" style="margin-top:6px">
+    <button class="btn-reauth" id="btn-reauth">再認証</button>
+    <button class="btn-area"   id="btn-set-area">エリア変更</button>
+  </div>
+</section>
+
+<!-- 放送局情報 -->
+<section>
+  <div class="sec-title">現在のページ</div>
+  <div class="row">
+    <span class="lbl">放送局</span>
+    <span class="val" id="station-id">—</span>
+  </div>
+  <div class="row">
+    <span class="lbl">種別</span>
+    <span class="val" id="broadcast-type">—</span>
+  </div>
+  <div class="row" id="row-start-time" style="display:none">
+    <span class="lbl">開始時刻</span>
+    <span class="val" id="start-time">—</span>
+  </div>
+  <div class="row" id="row-end-time" style="display:none">
+    <span class="lbl">終了時刻 (仮)</span>
+    <span class="val" id="end-time">—</span>
+  </div>
+
+  <!-- ダウンロードボタン & プログレス -->
+  <button class="btn-download" id="btn-download" disabled>
+    ダウンロード
+  </button>
+  <div id="progress-wrap">
+    <div class="progress-bar-bg">
+      <div class="progress-bar-fill" id="progress-fill"></div>
+    </div>
+    <div id="progress-label">準備中…</div>
+  </div>
+</section>
+
+<!-- デバッグ -->
+<section>
+  <details>
+    <summary>declarativeNetRequest ルール (デバッグ)</summary>
+    <pre id="debug-pre">…</pre>
+  </details>
+</section>
+
+<script src="popup.js"></script>
+</body>
+</html>

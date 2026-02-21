@@ -1,0 +1,43 @@
+{
+  "manifest_version": 3,
+  "name": "RecRadiko",
+  "version": "0.2.0",
+  "description": "Radikoタイムフリー放送をAACファイルとしてダウンロード",
+
+  "permissions": [
+    "declarativeNetRequest",
+    "declarativeNetRequestWithHostAccess",
+    "storage",
+    "alarms",
+    "downloads",
+    "tabs"
+  ],
+
+  "host_permissions": [
+    "https://radiko.jp/*",
+    "https://*.radiko.jp/*",
+    "https://*.smartstream.ne.jp/*",
+    "https://*.radiko-cf.com/*"
+  ],
+
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+
+  "content_scripts": [
+    {
+      "matches": [
+        "https://radiko.jp/*",
+        "https://*.radiko.jp/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "RecRadiko"
+  }
+}
